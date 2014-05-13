@@ -12,11 +12,17 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import com.contactmanager.dao.ContactManagerDaoFactory;
 import com.contactmanager.representation.ContactDetails;
+import com.contactmanager.response.ContactManagerResponse;
+import com.contactmanager.response.ContactManagerResponseAll;
 import com.contactmanager.services.ContactManagerServices;
+
 
 @Path("contacts")
 public class ContactManager {
@@ -24,33 +30,45 @@ public class ContactManager {
 	Connection connection = ContactManagerDaoFactory.createconnection();
 
 	ContactDetails contactDetail = new ContactDetails();
+	ContactManagerResponse contactResponse = new ContactManagerResponse();
+	ContactManagerResponseAll contactResponseAll = new ContactManagerResponseAll();
 	ContactManagerServices contactManagerServices = new ContactManagerServices();
 
-	ArrayList<ContactDetails> contacts = new ArrayList();
+	ArrayList<ContactDetails> contactDetails = new ArrayList();
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public ArrayList<ContactDetails> list() {
-		contacts = contactManagerServices.allcontactdetails(connection);
-		return contacts;
+	public Response list() {
+		contactDetails = contactManagerServices.allcontactdetails(connection);
+		if (contactDetails.get(0).getContactId() != 0) {
+			contactResponseAll.setCode(1);
+			contactResponseAll.setMessage("Displaying All Contacts");
+			contactResponseAll.setContactDetails(contactDetails);
+			
+		}
+		return Response.status(Status.OK).entity(new GenericEntity<ContactManagerResponseAll>(contactResponseAll){}).build();
 	}
 
 	@Path("/{contactid}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public ContactDetails find(@PathParam("contactid")
+	public Response find(@PathParam("contactid")
 	int contactid) {
 		contactDetail.setContactId(contactid);
 		contactDetail = contactManagerServices.getContact(contactDetail,
 				connection);
-
-		return contactDetail;
+		if(contactDetail.getContactId() != 0) {
+			contactResponse.setCode(1);
+			contactResponse.setMessage("Dislaying Contact Details");
+			contactResponse.setContactDetail(contactDetail);
+		}
+		return Response.status(Status.OK).entity(new GenericEntity<ContactManagerResponse>(contactResponse){}).build();
 	}
 
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces(MediaType.APPLICATION_JSON)
-	public ContactDetails createnew(@FormParam("firstname")
+	public Response createnew(@FormParam("firstname")
 	String firstName, @FormParam("lastname")
 	String lastName, @FormParam("address")
 	String physicalAddress, @FormParam("phonenumber")
@@ -64,13 +82,19 @@ public class ContactManager {
 		contactDetail.setEmailId(emailId);
 		contactDetail = contactManagerServices.addContact(contactDetail,
 				connection);
-		return contactDetail;
+		int contactId = contactDetail.getContactId();
+		if(contactId != 0 || contactId != -1) {
+			contactResponse.setCode(1);
+			contactResponse.setMessage("Contact Added Successfully");
+			contactResponse.setContactDetail(contactDetail);
+		}
+		return Response.status(Status.CREATED).entity(new GenericEntity<ContactManagerResponse>(contactResponse){}).build();
 	}
 
 	@Path("/{contactid}")
 	@PUT
 	@Produces(MediaType.APPLICATION_JSON)
-	public ContactDetails update(@PathParam("contactid")
+	public Response update(@PathParam("contactid")
 	int contactid, @FormParam("firstname")
 	String firstName, @FormParam("lastname")
 	String lastName, @FormParam("address")
@@ -85,19 +109,31 @@ public class ContactManager {
 		contactDetail.setEmailId(emailId);
 		contactDetail = contactManagerServices.updateContact(contactDetail,
 				connection);
-		return contactDetail;
+		if(contactDetail.getContactId() != 0) {
+			contactResponse.setCode(1);
+			contactResponse.setMessage("Updated Contact Details");
+			contactResponse.setContactDetail(contactDetail);
+		}
+		return Response.status(Status.OK).entity(new GenericEntity<ContactManagerResponse>(contactResponse){}).build();
+
 
 	}
 
 	@Path("/{contactid}")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
-	public ContactDetails delete(@PathParam("contactid")
+	public Response delete(@PathParam("contactid")
 	int contactId) {
 		contactDetail.setContactId(contactId);
 		contactDetail = contactManagerServices.deleteContact(contactDetail,
 				connection);
-		return contactDetail;
+		if(contactDetail.getContactId() != 0) {
+			contactResponse.setCode(1);
+			contactResponse.setMessage("Deleted Contact Details");
+			contactResponse.setContactDetail(contactDetail);
+		}
+		return Response.status(Status.OK).entity(new GenericEntity<ContactManagerResponse>(contactResponse){}).build();
+
 
 	}
 

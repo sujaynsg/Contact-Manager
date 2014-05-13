@@ -12,7 +12,7 @@ public class ContactManagerServices {
 
 	public ArrayList<ContactDetails> allcontactdetails(Connection connection) {
 
-		ArrayList<ContactDetails> contacts = new ArrayList();
+		ArrayList<ContactDetails> contactDetails = new ArrayList();
 
 		ResultSet rs = null;
 		try {
@@ -21,6 +21,7 @@ public class ContactManagerServices {
 			String squery = "select * from contactregister;";
 			rs = statement.executeQuery(squery);
 			while (rs.next()) {
+				flag = 1;
 				ContactDetails contactDetail = new ContactDetails();
 				contactDetail.setContactId(rs.getInt(1));
 				contactDetail.setFirstName(rs.getString(2));
@@ -28,14 +29,20 @@ public class ContactManagerServices {
 				contactDetail.setPhysicalAddress(rs.getString(4));
 				contactDetail.setPhoneNumber(rs.getLong(5));
 				contactDetail.setEmailId(rs.getString(6));
-				contacts.add(contactDetail);
+				contactDetails.add(contactDetail);	
 			}
+		   if(flag == 0) {
+			   ContactDetails contactDetail = new ContactDetails();
+			   contactDetail.setContactId(0);
+			   contactDetails.add(contactDetail);
+			   
+		   }
 		} catch (SQLException sqle) {
 
 		} catch (Exception e) {
 
 		}
-		return contacts;
+		return contactDetails;
 
 	}
 
@@ -110,9 +117,12 @@ public class ContactManagerServices {
 				if (rs1.next()) {
 					contactDetail.setContactId(rs1.getInt(1));
 				}
-				return contactDetail;
+				else {
+					contactDetail.setContactId(0);
+				}
+				
 			} else {
-				return contactDetail;
+				contactDetail.setContactId(-1);
 			}
 
 		} catch (SQLException sqle) {
@@ -135,7 +145,7 @@ public class ContactManagerServices {
 			long phoneNumber = contactDetail.getPhoneNumber();
 			String emailId = contactDetail.getEmailId();
 			Statement statement = connection.createStatement();
-			String squery = "update contactregister(firstname,lastname,physicaladdress,phonenumber,emailid) set firstname = '"
+			String squery = "update contactregister set firstname = '"
 					+ firstName
 					+ "',lastname = '"
 					+ lastName
@@ -145,14 +155,12 @@ public class ContactManagerServices {
 					+ phoneNumber
 					+ "',emailid = '"
 					+ emailId + "' where contactid ='" + contactId + "';";
+			System.out.println(squery);
 			int a = statement.executeUpdate(squery);
 
-			if (a == 0) {
-
-				return contactDetail;
-			} else {
-				return contactDetail;
-			}
+			if (a == -1) {
+				contactDetail.setContactId(0);
+			} 
 
 		} catch (SQLException sqle) {
 
@@ -173,6 +181,9 @@ public class ContactManagerServices {
 			String squery = "delete from contactregister where contactid ='"
 					+ contactId + "';";
 			int a = statement.executeUpdate(squery);
+			if (a == -1) {
+				contactDetail.setContactId(0);
+			} 
 
 		} catch (SQLException sqle) {
 

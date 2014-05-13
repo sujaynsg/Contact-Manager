@@ -1,12 +1,20 @@
 package com.contactmanager.representation;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
 public class ContactDetails {
 
+	@JsonProperty("contact_id")
 	int contactId;
+	@JsonProperty("first_name")
 	String firstName;
+	@JsonProperty("last_name")
 	String lastName;
+	@JsonProperty("physical_address")
 	String physicalAddress;
+	@JsonProperty("phone_number")
 	long phoneNumber;
+	@JsonProperty("email_id")
 	String emailId;
 
 	public int getContactId() {
