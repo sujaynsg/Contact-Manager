@@ -17,7 +17,7 @@ public class ContactManagerResponse {
 	String message;
 	@JsonProperty("contact_detail")
 	ContactDetails contactDetail = new ContactDetails();
-	
+
 	public ContactDetails getContactDetail() {
 		return contactDetail;
 	}

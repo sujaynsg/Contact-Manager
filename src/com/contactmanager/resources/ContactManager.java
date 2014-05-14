@@ -19,10 +19,12 @@ import javax.ws.rs.core.Response.Status;
 
 import com.contactmanager.dao.ContactManagerDaoFactory;
 import com.contactmanager.representation.ContactDetails;
+import com.contactmanager.response.BadRequestException;
+import com.contactmanager.response.ConflictRequestException;
+import com.contactmanager.response.ContactManagerError;
 import com.contactmanager.response.ContactManagerResponse;
 import com.contactmanager.response.ContactManagerResponseAll;
 import com.contactmanager.services.ContactManagerServices;
-
 
 @Path("contacts")
 public class ContactManager {
@@ -33,6 +35,7 @@ public class ContactManager {
 	ContactManagerResponse contactResponse = new ContactManagerResponse();
 	ContactManagerResponseAll contactResponseAll = new ContactManagerResponseAll();
 	ContactManagerServices contactManagerServices = new ContactManagerServices();
+	ContactManagerError contactManagerError = new ContactManagerError();
 
 	ArrayList<ContactDetails> contactDetails = new ArrayList();
 
@@ -41,12 +44,18 @@ public class ContactManager {
 	public Response list() {
 		contactDetails = contactManagerServices.allcontactdetails(connection);
 		if (contactDetails.get(0).getContactId() != 0) {
-			contactResponseAll.setCode(1);
+			contactResponseAll.setCode(200);
 			contactResponseAll.setMessage("Displaying All Contacts");
 			contactResponseAll.setContactDetails(contactDetails);
-			
+			return Response.status(Status.OK).entity(
+					new GenericEntity<ContactManagerResponseAll>(
+							contactResponseAll) {
+					}).build();
+		} else {
+			contactManagerError.setCode(404);
+			contactManagerError.setMessage("No data avaliable!!!");
+			throw new BadRequestException(contactManagerError);
 		}
-		return Response.status(Status.OK).entity(new GenericEntity<ContactManagerResponseAll>(contactResponseAll){}).build();
 	}
 
 	@Path("/{contactid}")
@@ -57,12 +66,20 @@ public class ContactManager {
 		contactDetail.setContactId(contactid);
 		contactDetail = contactManagerServices.getContact(contactDetail,
 				connection);
-		if(contactDetail.getContactId() != 0) {
-			contactResponse.setCode(1);
+		if (contactDetail.getContactId() != 0) {
+			contactResponse.setCode(200);
 			contactResponse.setMessage("Dislaying Contact Details");
 			contactResponse.setContactDetail(contactDetail);
+			return Response.status(Status.OK).entity(
+					new GenericEntity<ContactManagerResponse>(contactResponse) {
+					}).build();
+		} else {
+			contactManagerError.setCode(404);
+			contactManagerError.setMessage("No data avaliable for Contact Id:"
+					+ contactid);
+			throw new BadRequestException(contactManagerError);
 		}
-		return Response.status(Status.OK).entity(new GenericEntity<ContactManagerResponse>(contactResponse){}).build();
+
 	}
 
 	@POST
@@ -80,15 +97,45 @@ public class ContactManager {
 		contactDetail.setPhysicalAddress(physicalAddress);
 		contactDetail.setPhoneNumber(phoneNumber);
 		contactDetail.setEmailId(emailId);
-		contactDetail = contactManagerServices.addContact(contactDetail,
-				connection);
-		int contactId = contactDetail.getContactId();
-		if(contactId != 0 || contactId != -1) {
-			contactResponse.setCode(1);
-			contactResponse.setMessage("Contact Added Successfully");
-			contactResponse.setContactDetail(contactDetail);
+		if (firstName.isEmpty()) {
+			contactManagerError.setCode(404);
+			contactManagerError
+					.setMessage("You might missed  First Name which is a mandatory fields");
+			throw new BadRequestException(contactManagerError);
+
+		} else if (phoneNumber == 0) {
+			contactManagerError.setCode(404);
+			contactManagerError
+					.setMessage("You might missed  Phone Number which is a mandatory fields");
+			throw new BadRequestException(contactManagerError);
+
 		}
-		return Response.status(Status.CREATED).entity(new GenericEntity<ContactManagerResponse>(contactResponse){}).build();
+
+		else {
+			contactDetail = contactManagerServices.addContact(contactDetail,
+					connection);
+			int contactId = contactDetail.getContactId();
+			if (contactId == -1) {
+				contactManagerError.setCode(409);
+				contactManagerError
+						.setMessage("Your given phone number has been already registered. Please use different Phone Number");
+				throw new ConflictRequestException(contactManagerError);
+			} else if (contactId == 0) {
+				contactManagerError.setCode(404);
+				contactManagerError
+						.setMessage("Issues in Database, Data has not been inserted properly!!!");
+				throw new BadRequestException(contactManagerError);
+
+			} else {
+				contactResponse.setCode(201);
+				contactResponse.setMessage("Contact Added Successfully");
+				contactResponse.setContactDetail(contactDetail);
+				return Response.status(Status.CREATED).entity(
+						new GenericEntity<ContactManagerResponse>(
+								contactResponse) {
+						}).build();
+			}
+		}
 	}
 
 	@Path("/{contactid}")
@@ -109,31 +156,61 @@ public class ContactManager {
 		contactDetail.setEmailId(emailId);
 		contactDetail = contactManagerServices.updateContact(contactDetail,
 				connection);
-		if(contactDetail.getContactId() != 0) {
-			contactResponse.setCode(1);
+		int contactId = contactDetail.getContactId();
+		if (contactId == -1) {
+			contactManagerError.setCode(409);
+			contactManagerError
+					.setMessage("Your given phone number has been already registered. Please use different Phone Number");
+			throw new ConflictRequestException(contactManagerError);
+		} else if (contactId == 0) {
+			contactManagerError.setCode(404);
+			contactManagerError.setMessage("No data avaliable for Contact Id:"
+					+ contactid);
+			throw new BadRequestException(contactManagerError);
+
+		} else if (contactId == -2) {
+			contactManagerError.setCode(404);
+			contactManagerError
+					.setMessage("Issues in Database, Data has not been updated properly!!!");
+			throw new BadRequestException(contactManagerError);
+		} else {
+			contactResponse.setCode(200);
 			contactResponse.setMessage("Updated Contact Details");
 			contactResponse.setContactDetail(contactDetail);
+			return Response.status(Status.OK).entity(
+					new GenericEntity<ContactManagerResponse>(contactResponse) {
+					}).build();
 		}
-		return Response.status(Status.OK).entity(new GenericEntity<ContactManagerResponse>(contactResponse){}).build();
-
-
 	}
 
 	@Path("/{contactid}")
 	@DELETE
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response delete(@PathParam("contactid")
-	int contactId) {
-		contactDetail.setContactId(contactId);
+	int contactid) {
+		contactDetail.setContactId(contactid);
 		contactDetail = contactManagerServices.deleteContact(contactDetail,
 				connection);
-		if(contactDetail.getContactId() != 0) {
-			contactResponse.setCode(1);
+		int contactId = contactDetail.getContactId();
+		if (contactId == 0) {
+			contactManagerError.setCode(404);
+			contactManagerError.setMessage("No data avaliable for Contact Id:"
+					+ contactid);
+			throw new BadRequestException(contactManagerError);
+
+		} else if (contactId == -2) {
+			contactManagerError.setCode(404);
+			contactManagerError
+					.setMessage("Issues in Database, Data has not been updated properly!!!");
+			throw new BadRequestException(contactManagerError);
+		} else {
+			contactResponse.setCode(200);
 			contactResponse.setMessage("Deleted Contact Details");
 			contactResponse.setContactDetail(contactDetail);
+			return Response.status(Status.OK).entity(
+					new GenericEntity<ContactManagerResponse>(contactResponse) {
+					}).build();
 		}
-		return Response.status(Status.OK).entity(new GenericEntity<ContactManagerResponse>(contactResponse){}).build();
-
 
 	}
 

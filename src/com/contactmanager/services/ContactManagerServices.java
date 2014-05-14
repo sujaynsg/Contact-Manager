@@ -29,14 +29,14 @@ public class ContactManagerServices {
 				contactDetail.setPhysicalAddress(rs.getString(4));
 				contactDetail.setPhoneNumber(rs.getLong(5));
 				contactDetail.setEmailId(rs.getString(6));
-				contactDetails.add(contactDetail);	
+				contactDetails.add(contactDetail);
 			}
-		   if(flag == 0) {
-			   ContactDetails contactDetail = new ContactDetails();
-			   contactDetail.setContactId(0);
-			   contactDetails.add(contactDetail);
-			   
-		   }
+			if (flag == 0) {
+				ContactDetails contactDetail = new ContactDetails();
+				contactDetail.setContactId(0);
+				contactDetails.add(contactDetail);
+
+			}
 		} catch (SQLException sqle) {
 
 		} catch (Exception e) {
@@ -58,10 +58,6 @@ public class ContactManagerServices {
 					+ contactId + "';";
 			rs = statement.executeQuery(squery);
 			if (rs.next()) {
-				/*
-				 * return "<h2>Details of Employee # " + employeeId + " </h2><p><h3>Employee
-				 * name: " + rs.getString(2) + "</h3>";
-				 */
 				contactDetail.setFirstName(rs.getString(2));
 				contactDetail.setLastName(rs.getString(3));
 				contactDetail.setPhysicalAddress(rs.getString(4));
@@ -116,11 +112,10 @@ public class ContactManagerServices {
 								+ phoneNumber + "'");
 				if (rs1.next()) {
 					contactDetail.setContactId(rs1.getInt(1));
-				}
-				else {
+				} else {
 					contactDetail.setContactId(0);
 				}
-				
+
 			} else {
 				contactDetail.setContactId(-1);
 			}
@@ -138,29 +133,51 @@ public class ContactManagerServices {
 		// TODO Auto-generated method stub
 
 		try {
+			int flag = 0;
 			int contactId = contactDetail.getContactId();
-			String firstName = contactDetail.getFirstName();
-			String lastName = contactDetail.getLastName();
-			String physicalAddress = contactDetail.getPhysicalAddress();
-			long phoneNumber = contactDetail.getPhoneNumber();
-			String emailId = contactDetail.getEmailId();
-			Statement statement = connection.createStatement();
-			String squery = "update contactregister set firstname = '"
-					+ firstName
-					+ "',lastname = '"
-					+ lastName
-					+ "',physicaladdress = '"
-					+ physicalAddress
-					+ "',phonenumber = '"
-					+ phoneNumber
-					+ "',emailid = '"
-					+ emailId + "' where contactid ='" + contactId + "';";
-			System.out.println(squery);
-			int a = statement.executeUpdate(squery);
+			ContactDetails contactDetailTemp = new ContactDetails();
+			contactDetailTemp.setContactId(contactId);
+			contactDetailTemp = getContact(contactDetailTemp, connection);
+			if (contactDetailTemp.getContactId() == 0) {
 
-			if (a == -1) {
-				contactDetail.setContactId(0);
-			} 
+				contactDetailTemp.setContactId(0);
+				return contactDetailTemp;
+
+			} else {
+				String firstName = contactDetail.getFirstName();
+				String lastName = contactDetail.getLastName();
+				String physicalAddress = contactDetail.getPhysicalAddress();
+				long phoneNumber = contactDetail.getPhoneNumber();
+				String emailId = contactDetail.getEmailId();
+				Statement statement = connection.createStatement();
+				ResultSet rs = statement
+						.executeQuery("select phonenumber from contactregister");
+				while (rs.next()) {
+					if (phoneNumber == rs.getLong(1)) {
+						System.out.println(phoneNumber + "," + rs.getLong(1));
+						flag = 1;
+					}
+				}
+				System.out.println(flag);
+				if (flag == 0) {
+					String squery = "update contactregister  set firstname = '"
+							+ firstName + "',lastname = '" + lastName
+							+ "',physicaladdress = '" + physicalAddress
+							+ "',phonenumber = '" + phoneNumber
+							+ "',emailid = '" + emailId
+							+ "' where contactid ='" + contactId + "';";
+					System.out.println(squery);
+					int a = statement.executeUpdate(squery);
+					System.out.println(a);
+					if (a > 0) {
+						contactDetail.setContactId(contactId);
+					} else if (a == 0) {
+						contactDetail.setContactId(-2);
+					}
+				} else {
+					contactDetail.setContactId(-1);
+				}
+			}
 
 		} catch (SQLException sqle) {
 
@@ -175,15 +192,25 @@ public class ContactManagerServices {
 			Connection connection) {
 
 		try {
-			contactDetail = getContact(contactDetail, connection);
 			int contactId = contactDetail.getContactId();
-			Statement statement = connection.createStatement();
-			String squery = "delete from contactregister where contactid ='"
-					+ contactId + "';";
-			int a = statement.executeUpdate(squery);
-			if (a == -1) {
+			contactDetail = getContact(contactDetail, connection);
+			if (contactDetail.getContactId() == 0) {
+
 				contactDetail.setContactId(0);
-			} 
+				return contactDetail;
+
+			} else {
+
+				Statement statement = connection.createStatement();
+				String squery = "delete from contactregister where contactid ='"
+						+ contactId + "';";
+				int a = statement.executeUpdate(squery);
+				if (a == 0) {
+					contactDetail.setContactId(-2);
+				} else {
+					contactDetail.setContactId(contactId);
+				}
+			}
 
 		} catch (SQLException sqle) {
 
