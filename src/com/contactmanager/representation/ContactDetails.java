@@ -1,5 +1,7 @@
 package com.contactmanager.representation;
 
+import java.io.InputStream;
+
 import org.codehaus.jackson.annotate.JsonProperty;
 
 public class ContactDetails {
@@ -16,6 +18,7 @@ public class ContactDetails {
 	long phoneNumber;
 	@JsonProperty("email_id")
 	String emailId;
+	
 
 	public int getContactId() {
 		return contactId;
