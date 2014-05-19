@@ -18,7 +18,6 @@ public class ContactDetails {
 	long phoneNumber;
 	@JsonProperty("email_id")
 	String emailId;
-	
 
 	public int getContactId() {
 		return contactId;

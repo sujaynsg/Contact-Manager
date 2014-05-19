@@ -82,33 +82,33 @@ public class ContactManagerServices {
 
 	}
 
-	public ContactPhoto getContactPhoto(ContactDetails contactDetail,ContactPhoto contactPhoto,
-			Connection connection) {
+	public ContactPhoto getContactPhoto(ContactDetails contactDetail,
+			ContactPhoto contactPhoto, Connection connection) {
 		// TODO Auto-generated method stub
 
 		ResultSet rs = null;
 		try {
 			int contactId = contactDetail.getContactId();
-			String filePath = "D:/Photos/"+contactId+".jpg";
+			String filePath = "E:/Photos/" + contactId + ".jpg";
 			System.out.println(filePath);
 			final int BUFFER_SIZE = 4096;
 			String squery = "SELECT contactphoto FROM contactregister WHERE contactid = '"
 					+ contactId + "';";
 			PreparedStatement statement1 = connection.prepareStatement(squery);
-			 ResultSet result = statement1.executeQuery();
-	            if (result.next()) {
-	                Blob blob = result.getBlob("contactphoto");
-	                InputStream inputStream = blob.getBinaryStream();
-	                OutputStream outputStream = new FileOutputStream(filePath);
-	 
-	                int bytesRead = -1;
-	                byte[] buffer = new byte[BUFFER_SIZE];
-	                while ((bytesRead = inputStream.read(buffer)) != -1) {
-	                    outputStream.write(buffer, 0, bytesRead);
-	                }
-	                System.out.println("File saved");
-	                contactPhoto.setUploadedPhoto(inputStream);
-	                
+			ResultSet result = statement1.executeQuery();
+			if (result.next()) {
+				Blob blob = result.getBlob("contactphoto");
+				InputStream inputStream = blob.getBinaryStream();
+				OutputStream outputStream = new FileOutputStream(filePath);
+
+				int bytesRead = -1;
+				byte[] buffer = new byte[BUFFER_SIZE];
+				while ((bytesRead = inputStream.read(buffer)) != -1) {
+					outputStream.write(buffer, 0, bytesRead);
+				}
+				System.out.println("File saved");
+				contactPhoto.setUploadedPhoto(inputStream);
+
 			} else {
 				contactPhoto.setUploadedPhoto(null);
 			}
@@ -121,9 +121,9 @@ public class ContactManagerServices {
 		return contactPhoto;
 
 	}
-	
-	public ContactPhoto addContact(ContactDetails contactDetail,ContactPhoto contactPhoto,
-			Connection connection) {
+
+	public ContactPhoto addContact(ContactDetails contactDetail,
+			ContactPhoto contactPhoto, Connection connection) {
 		// TODO Auto-generated method stub
 		try {
 			int flag = 0;
@@ -141,24 +141,26 @@ public class ContactManagerServices {
 					flag = 1;
 				}
 			}
-			
+
 			if (flag == 0) {
-				 String sql = "INSERT INTO contactregister (firstname,lastname,physicaladdress,phonenumber,emailid,contactphoto) values (?,?,?,?,?,?)";
-			      PreparedStatement statement1 = connection.prepareStatement(sql);
-				
-			      statement1.setString(1, firstName);
-			      statement1.setString(2, lastName);
-			      statement1.setString(3, physicalAddress);
-			      statement1.setLong(4, phoneNumber);
-			      statement1.setString(5, emailId);
-			      statement1.setBlob(6, uploadedPhoto);
+
+				String sql = "INSERT INTO contactregister (firstname,lastname,physicaladdress,phonenumber,emailid,contactphoto) values (?,?,?,?,?,?)";
+				PreparedStatement statement1 = connection.prepareStatement(sql);
+
+				statement1.setString(1, firstName);
+				statement1.setString(2, lastName);
+				statement1.setString(3, physicalAddress);
+				statement1.setLong(4, phoneNumber);
+				statement1.setString(5, emailId);
+				statement1.setBlob(6, uploadedPhoto);
 				System.out.println(sql);
-			      int row = statement1.executeUpdate();
+				int row = statement1.executeUpdate();
+
 				ResultSet rs1 = statement
 						.executeQuery("select contactid from contactregister where phonenumber = '"
 								+ phoneNumber + "'");
 				if (rs1.next()) {
-					
+
 					contactDetail.setContactId(rs1.getInt(1));
 				} else {
 					contactDetail.setContactId(0);
@@ -176,8 +178,8 @@ public class ContactManagerServices {
 		return contactPhoto;
 	}
 
-	public ContactDetails updateContact(ContactDetails contactDetail,ContactPhoto contactPhoto,
-			Connection connection) {
+	public ContactDetails updateContact(ContactDetails contactDetail,
+			ContactPhoto contactPhoto, Connection connection) {
 		// TODO Auto-generated method stub
 
 		try {
@@ -200,7 +202,8 @@ public class ContactManagerServices {
 				InputStream uploadedPhoto = contactPhoto.getUploadedPhoto();
 				Statement statement = connection.createStatement();
 				ResultSet rs = statement
-						.executeQuery("select phonenumber from contactregister where contactid <> '"+ contactId + "'");
+						.executeQuery("select phonenumber from contactregister where contactid <> '"
+								+ contactId + "'");
 				while (rs.next()) {
 					if (phoneNumber == rs.getLong(1)) {
 						System.out.println(phoneNumber + "," + rs.getLong(1));
@@ -209,19 +212,20 @@ public class ContactManagerServices {
 				}
 				System.out.println(flag);
 				if (flag == 0) {
-					 String sql = "update contactregister set firstname = ?,lastname = ?, physicaladdress = ?, phonenumber =?, emailid = ?, contactphoto = ? where contactid = ?";
-				      PreparedStatement statement1 = connection.prepareStatement(sql);
-					
-				      statement1.setString(1, firstName);
-				      statement1.setString(2, lastName);
-				      statement1.setString(3, physicalAddress);
-				      statement1.setLong(4, phoneNumber);
-				      statement1.setString(5, emailId);
-				      statement1.setBlob(6, uploadedPhoto);
-				      statement1.setInt(7, contactId);
+					String sql = "update contactregister set firstname = ?,lastname = ?, physicaladdress = ?, phonenumber =?, emailid = ?, contactphoto = ? where contactid = ?";
+					PreparedStatement statement1 = connection
+							.prepareStatement(sql);
+
+					statement1.setString(1, firstName);
+					statement1.setString(2, lastName);
+					statement1.setString(3, physicalAddress);
+					statement1.setLong(4, phoneNumber);
+					statement1.setString(5, emailId);
+					statement1.setBlob(6, uploadedPhoto);
+					statement1.setInt(7, contactId);
 					System.out.println(sql);
-				      int a = statement1.executeUpdate();
-				
+					int a = statement1.executeUpdate();
+
 					System.out.println(a);
 					if (a > 0) {
 						contactDetail.setContactId(contactId);

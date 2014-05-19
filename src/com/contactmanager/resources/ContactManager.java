@@ -1,6 +1,5 @@
 package com.contactmanager.resources;
 
-
 import java.awt.Image;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -37,7 +36,6 @@ import com.contactmanager.response.ContactManagerResponse;
 import com.contactmanager.response.ContactManagerResponseAll;
 import com.contactmanager.services.ContactManagerServices;
 import com.sun.jersey.multipart.FormDataParam;
-
 
 @Path("contacts")
 public class ContactManager {
@@ -95,22 +93,23 @@ public class ContactManager {
 		}
 
 	}
-	
+
 	@Path("/{contactid}/photo")
 	@GET
-	@Produces("image/jpg")
-	//@Produces({"image/png", "image/jpeg", "image/gif"})
+	@Produces("image/jpeg")
+	// @Produces({"image/png", "image/jpeg", "image/gif"})
 	public Response findphoto(@PathParam("contactid")
 	int contactid) {
 		contactDetail.setContactId(contactid);
-		contactPhoto = contactManagerServices.getContactPhoto(contactDetail,contactPhoto,
-				connection);
+		contactPhoto = contactManagerServices.getContactPhoto(contactDetail,
+				contactPhoto, connection);
 		if (contactPhoto.getUploadedPhoto() != null) {
 			contactResponse.setCode(200);
 			contactResponse.setMessage("Dislaying Contact Details");
 			contactResponse.setContactDetail(contactDetail);
 			return Response.status(Status.OK).entity(
-					new GenericEntity<InputStream>(contactPhoto.getUploadedPhoto()) {
+					new GenericEntity<InputStream>(contactPhoto
+							.getUploadedPhoto()) {
 					}).build();
 		} else {
 			contactManagerError.setCode(404);
@@ -121,11 +120,10 @@ public class ContactManager {
 
 	}
 
-
 	@POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
-	//@Produces("image/jpeg")
+	// @Produces("image/jpeg")
 	public Response createnew(@FormDataParam("firstname")
 	String firstName, @FormDataParam("lastname")
 	String lastName, @FormDataParam("address")
@@ -154,8 +152,8 @@ public class ContactManager {
 		}
 
 		else {
-			contactPhoto = contactManagerServices.addContact(contactDetail,contactPhoto,
-					connection);
+			contactPhoto = contactManagerServices.addContact(contactDetail,
+					contactPhoto, connection);
 			int contactId = contactDetail.getContactId();
 			if (contactId == -1) {
 				contactManagerError.setCode(409);
@@ -176,49 +174,10 @@ public class ContactManager {
 						new GenericEntity<ContactManagerResponse>(
 								contactResponse) {
 						}).build();
-				
-				
-				
+
 			}
 		}
-		
-		/* try {
-	            
-			 
-			 String filePath = "D:/Photos/sujay2.png";
-	            String sql1 = "SELECT contactphoto FROM contactregister WHERE contactid = 23";
-	            PreparedStatement statement1 = connection.prepareStatement(sql1);
-	            final int BUFFER_SIZE = 4096;
-	 System.out.println("sujay");
-	            ResultSet result = statement1.executeQuery();
-	            if (result.next()) {
-	                Blob blob = result.getBlob("contactphoto");
-	                InputStream inputStream = blob.getBinaryStream();
-	                OutputStream outputStream = new FileOutputStream(filePath);
-	 
-	                int bytesRead = -1;
-	                byte[] buffer = new byte[BUFFER_SIZE];
-	                while ((bytesRead = inputStream.read(buffer)) != -1) {
-	                    outputStream.write(buffer, 0, bytesRead);
-	                }
-	                System.out.println("File saved");
-	                return Response.ok(inputStream).build();
-	               // inputStream.close();
-	               // outputStream.close();
-	                
-	            }
-	            connection.close();
-	        } catch (SQLException ex) {
-	            ex.printStackTrace();
-	        } catch (IOException ex) {
-	            ex.printStackTrace();
-	        }
 
-		String output = "File uploaded to : "; //+ uploadedFileLocation;
-
-		return Response.status(200).entity(output).build();*/
-
-	
 	}
 
 	@Path("/{contactid}")
@@ -240,8 +199,8 @@ public class ContactManager {
 		contactDetail.setPhoneNumber(phoneNumber);
 		contactDetail.setEmailId(emailId);
 		contactPhoto.setUploadedPhoto(uploadedPhoto);
-		contactDetail = contactManagerServices.updateContact(contactDetail,contactPhoto,
-				connection);
+		contactDetail = contactManagerServices.updateContact(contactDetail,
+				contactPhoto, connection);
 		int contactId = contactDetail.getContactId();
 		if (contactId == -1) {
 			contactManagerError.setCode(409);
