@@ -8,7 +8,7 @@ This API is based on the REST Principles.
 
 <table>
   <tr> 
-    <td><a href="#listcontacts" title="Listcontacts"> List Contacts </a><br> GET/http://localhost:8080/contactmanger/contacts/ </td>
+    <td>List Contacts<br> GET/http://localhost:8080/contactmanger/contacts/ </td>
     <td> List all the contacts </td>
   </tr>
   <tr> 
@@ -28,5 +28,10 @@ This API is based on the REST Principles.
     <td> Delete details of the contact</td>
   </tr>
 </table>
-<h3 id="listcontacts">List contacts</h3>
+<h3>List contacts</h3>
 <pre><code>GET  /contacts </code></pre>
+<p>List all contacts</p>
+<p>Parameters</p>
+
+
+
