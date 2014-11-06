@@ -14,25 +14,34 @@ import org.apache.catalina.startup.Tomcat;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class LaunchTomcat {
+	private static String createDBQuery;
+	  private static String charSet = "utf8";
+	  private static String newDB;
+	  private static Statement stmt = null;
+	  private static String url = "jdbc:mysql://localhost/contactmanager";
+	 // private static String driver="com.mysql.jdbc.Driver";
+	  private static String driver="org.gjt.mm.mysql.Driver";
+	  private static String usrName = "root";
+	  private static String pswd = "";
+	  private static Connection connection = null;
+	  private static ResultSet rs = null;
 
-	public static void main(String[] args) throws IOException, ServletException, LifecycleException  {
-
+	public static void main(String[] args) throws IOException, LifecycleException, ServletException, ClassNotFoundException, SQLException  {
 		
-		  Tomcat tomcat = new Tomcat(); tomcat.setPort(8080); String currentDir =
-		  new File(".").getCanonicalPath(); String webRoot = currentDir +
-		  File.separatorChar + "webapps"; tomcat.addWebapp("", new
-		  File("WebContent\\WEB-INF").getAbsolutePath());
-		  System.out.println("configuring app with basedir: " + new
-		  File("WebContent\\WEB-INF").getAbsolutePath()); tomcat.start();
+		  System.out.println("Hello Sujay");
+		  Tomcat tomcat = new Tomcat(); tomcat.setPort(8081); 
+		  tomcat.addWebapp("", new File("build").getAbsolutePath());
+		  System.out.println("configuring app with basedir: " + new File("build").getAbsolutePath());
+		  tomcat.start();
 		  tomcat.getServer().await();
-		 
-		/*Catalina cl = new Catalina();
-		cl.start();
-		while (true) {
-			continue;
-		}*/
-	}
+		  
+		}
 
 }

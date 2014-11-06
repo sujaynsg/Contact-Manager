@@ -9,9 +9,11 @@ public class ContactManagerDaoFactory {
 	public static Connection createconnection() {
 
 		final String DRIVER = "com.mysql.jdbc.Driver";
-		final String DBURL = "jdbc:mysql://localhost/contactmanager";
+		String newDB = "contactmanager";
+		//final String DBURL = "jdbc:mysql://localhost/contactmanager";
+	      final String DBURL ="jdbc:mysql://" + "127.0.0.1" + ":" + "3306" + "/" + newDB + "";
 		final String DBUSER = "root";
-		final String DBPASS = "root";
+		final String DBPASS = "";
 
 		Connection connection = null;
 
