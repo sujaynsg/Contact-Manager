@@ -8,7 +8,7 @@
     <property name="logs.dir" value="${project.dir}/logs"/>
     <property name="bin.dir" value="${project.dir}/bin"/>
     <property name="bash.dir" value="/bin/bash"/>
-    <property name="main.class" value="com.contactmanager.tomcat.LaunchTomcat"/>
+    <property name="main.class" value="com.contactmanager.dao.StartService"/>
 
 	<path id="master-classpath">
 		<fileset dir="${dist.dir}">
