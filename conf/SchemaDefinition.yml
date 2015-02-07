@@ -1,0 +1,10 @@
+contactregister : CREATE TABLE `contactregister` (
+                    `contactid` int(11) NOT NULL AUTO_INCREMENT,
+                    `firstname` varchar(100) NOT NULL,
+                    `lastname` varchar(100) DEFAULT NULL,
+                    `physicaladdress` varchar(500) DEFAULT NULL,
+                    `phonenumber` int(11) NOT NULL,
+                    `emailid` varchar(100) DEFAULT NULL,
+                    `contactphoto` blob,
+                    PRIMARY KEY (`contactid`)
+                  ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
